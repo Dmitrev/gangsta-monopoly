@@ -9,7 +9,7 @@ import (
 type Game struct {
 	Board    board.Board
 	Dice     dice.Dice
-	Players  []player.Player
+	Players  []*player.Player
 	initDone bool
 }
 
@@ -18,4 +18,9 @@ func NewGame() *Game {
 	// Unit testing to see if the value has been initialized
 	g.initDone = true
 	return &g
+}
+
+func (g *Game) AddPlayer(p *player.Player) {
+	g.Players = append(g.Players, p)
+
 }
