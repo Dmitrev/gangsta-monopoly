@@ -2,7 +2,6 @@ package dice
 
 import (
 	"math/rand"
-	"time"
 )
 
 type Dice struct {
@@ -17,8 +16,6 @@ func NewDice() *Dice {
 
 // Throw will generate new numbers in the Thrown slice
 func (d *Dice) Throw() {
-	// Make sure that we can generate random numbers
-	rand.Seed(time.Now().UnixNano())
 	max := 6
 	min := 1
 	thrown := make([]int, d.count)
