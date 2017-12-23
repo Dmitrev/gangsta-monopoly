@@ -26,7 +26,7 @@ func (d *Dice) Throw() {
 	// Generate new numbers from 1-6
 	for i := 0; i < d.count; i++ {
 		random := rand.Intn(max - min) + min
-		thrown = append(thrown, random)
+		thrown[i] = random
 	}
 
 	// Set the Thrown property
