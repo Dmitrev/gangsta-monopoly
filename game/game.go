@@ -1,6 +1,8 @@
 package game
 
 import (
+	"errors"
+
 	"github.com/Dmitrev/gangsta-monopoly/board"
 	"github.com/Dmitrev/gangsta-monopoly/dice"
 	"github.com/Dmitrev/gangsta-monopoly/player"
@@ -11,7 +13,11 @@ type Game struct {
 	Dice     dice.Dice
 	Players  []*player.Player
 	initDone bool
+	started  bool
 }
+
+var ErrNotEnoughPlayers = errors.New("not enough players in game")
+var ErrGameNotStarted = errors.New("game not started")
 
 func NewGame() *Game {
 	g := Game{}
@@ -23,4 +29,23 @@ func NewGame() *Game {
 func (g *Game) AddPlayer(p *player.Player) {
 	g.Players = append(g.Players, p)
 
+}
+
+func (g *Game) StartGame() (err error) {
+	if len(g.Players) < 2 {
+		err = ErrNotEnoughPlayers
+		return
+	}
+	g.started = true
+	return
+}
+
+func (g *Game) FirstTurn() (err error) {
+	if !g.started {
+		err = ErrGameNotStarted
+		return
+	}
+
+	g.Players[0].IsTurn = true
+	return
 }
