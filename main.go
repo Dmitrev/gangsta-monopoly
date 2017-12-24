@@ -1,15 +1,15 @@
 package main
 
 import (
-	"time"
 	"math/rand"
+	"time"
 )
 
-func init(){
+func init() {
 	// Make sure that we can generate random numbers
 	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {
-
+	startServer()
 }
