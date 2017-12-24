@@ -10,8 +10,8 @@ import (
 var upgrader = websocket.Upgrader{}
 
 type Message struct {
-	Action string
-	Data   string
+	Action string `json:"action"`
+	Data   string `json:"data"`
 }
 
 var clients = make(map[*websocket.Conn]bool)
@@ -45,6 +45,8 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 	// Add client to the clients slice
 	clients[conn] = true
 	log.Printf("New user connected\n")
+	// Send register request to client
+	sendRegisterRequest(conn)
 
 	var msg Message
 	// Connection loop
@@ -59,6 +61,7 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		handleEvent(conn, msg)
 	}
 
 }
