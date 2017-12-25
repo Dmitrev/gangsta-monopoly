@@ -1,0 +1,5 @@
+/*
+    v-cloak attribute is used to hide vue elements that are note loaded yet
+    The attribute is automatically removed from the element by VueJS ones it's loaded
+ */
+[v-cloak]{display:none}
