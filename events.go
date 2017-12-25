@@ -56,7 +56,7 @@ func register(conn *websocket.Conn, name string) {
 }
 
 func ready(conn *websocket.Conn) {
-	p := g.GetPlayer(conn)
+	p, _ := g.GetPlayer(conn)
 	// Toggle ready state
 	p.Ready = !p.Ready
 
@@ -65,7 +65,7 @@ func ready(conn *websocket.Conn) {
 }
 
 func throwDice(conn *websocket.Conn) {
-	p := g.GetPlayer(conn)
+	p, _ := g.GetPlayer(conn)
 	log.Printf("%s throws the dice\n", p.Name)
 	g.ThrowDice(p)
 }

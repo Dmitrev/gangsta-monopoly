@@ -5,6 +5,8 @@ import (
 
 	"log"
 
+	"fmt"
+
 	"github.com/Dmitrev/gangsta-monopoly/board"
 	"github.com/Dmitrev/gangsta-monopoly/dice"
 	"github.com/Dmitrev/gangsta-monopoly/player"
@@ -65,14 +67,15 @@ func (g *Game) FirstTurn() (err error) {
 	return
 }
 
-func (g *Game) GetPlayer(conn *websocket.Conn) *player.Player {
-	for _, p := range g.Players {
+func (g *Game) GetPlayer(conn *websocket.Conn) (*player.Player, int) {
+	for index, p := range g.Players {
+		log.Printf("Socket connection: %#v\n\n\n", conn)
 		if conn == p.Conn {
-			return p
+			return p, index
 		}
 	}
 
-	return nil
+	return nil, -1
 }
 
 func (g *Game) NextPosition(p *player.Player) int {
@@ -123,4 +126,31 @@ func (g *Game) SendAllPlayersPositions() {
 			Data   []PositionUpdate `json:"data"`
 		}{"position_update", positions})
 	}
+}
+
+func (g *Game) BroadCastPlayerLeft(p *player.Player) {
+	// Send all the positions
+	message := fmt.Sprintf("%s left the game", p.Name)
+
+	for _, p := range g.Players {
+		p.Conn.WriteJSON(&struct {
+			Action string `json:"action"`
+			Data   string `json:"data"`
+		}{"player_left", message})
+	}
+}
+
+func (g *Game) RemovePlayerByIndex(index int) {
+	g.Players = append(g.Players[:index], g.Players[index+1:]...)
+}
+
+func (g *Game) Disconnect(conn *websocket.Conn) {
+	p, index := g.GetPlayer(conn)
+	// Remvoe player from the players slice
+	g.RemovePlayerByIndex(index)
+	// Let other players know who left
+	g.BroadCastPlayerLeft(p)
+	// Update the players list
+	g.SendAllPlayersPositions()
+
 }

@@ -56,6 +56,8 @@ func websocketHandler(w http.ResponseWriter, r *http.Request) {
 
 		// If we cannot read the message anymore that means that the user is disconnected
 		if err != nil {
+			// Handle disconnect login in game
+			g.Disconnect(conn)
 			// Remove connection from clients
 			delete(clients, conn)
 			break
