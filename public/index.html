@@ -16,9 +16,11 @@
         </section>
         <section class="screen" v-else-if="screen == 'lobby'">
             <h1>Lobby</h1>
-            <ul>
-                <li v-for="player in players">{{player.name}}</li>
+            <button @click="ready">Ready</button>
+            <ul id="lobby-players">
+                <li :class="{ready: player.ready}" v-for="player in players">{{player.name}}</li>
             </ul>
+
         </section>
         <section class="screen" v-else-if="screen == 'game'">
             <h1>Game</h1>

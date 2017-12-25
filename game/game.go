@@ -22,6 +22,7 @@ type Game struct {
 type PositionUpdate struct {
 	Name     string `json:"name"`
 	Position int    `json:"position"`
+	Ready    bool   `json:"ready"`
 }
 
 var ErrNotEnoughPlayers = errors.New("not enough players in game")
@@ -112,7 +113,7 @@ func (g *Game) SendAllPlayersPositions() {
 
 	// Collect all the positions
 	for _, p := range g.Players {
-		positions = append(positions, PositionUpdate{p.Name, p.Position})
+		positions = append(positions, PositionUpdate{p.Name, p.Position, p.Ready})
 	}
 
 	// Send all the positions

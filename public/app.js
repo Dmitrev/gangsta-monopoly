@@ -42,6 +42,11 @@ new Vue({
                 this.register(); // Retry
             }
         },
+        ready: function () {
+            this.ws.send(JSON.stringify({
+                action: "ready"
+            }));
+        },
         throwDice: function(){
           this.ws.send(JSON.stringify({
               action: "throw_dice"

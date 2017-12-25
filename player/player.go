@@ -7,6 +7,7 @@ type Player struct {
 	IsTurn   bool
 	Conn     *websocket.Conn
 	Position int
+	Ready    bool
 }
 
 func NewPlayer() *Player {

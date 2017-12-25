@@ -13,6 +13,8 @@ func handleEvent(conn *websocket.Conn, msg Message) {
 	switch msg.Action {
 	case "register":
 		register(conn, msg.Data) // msg.Data will contain the name of the user
+	case "ready":
+		ready(conn)
 	}
 
 	//if !g.Started() {
@@ -51,6 +53,15 @@ func register(conn *websocket.Conn, name string) {
 	g.SendAllPlayersPositions()
 
 	conn.WriteJSON(&Message{"register_ok", ""})
+}
+
+func ready(conn *websocket.Conn) {
+	p := g.GetPlayer(conn)
+	// Toggle ready state
+	p.Ready = !p.Ready
+
+	// Send player information to all clients
+	g.SendAllPlayersPositions()
 }
 
 func throwDice(conn *websocket.Conn) {
