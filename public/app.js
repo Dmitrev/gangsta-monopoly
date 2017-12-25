@@ -21,8 +21,10 @@ new Vue({
             this.register(); // Retry
         }
       },
-      registerOk: function(){
-        alert('Register complete!');
+      throwDice: function(){
+          this.ws.send(JSON.stringify({
+              action: "throw_dice"
+          }));
       }
     },
     created: function () {
@@ -35,7 +37,6 @@ new Vue({
 
             switch(json.action) {
                 case 'register': self.register(); break;
-                case 'register_ok': self.registerOk(); break;
             }
         }
     }

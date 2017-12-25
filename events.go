@@ -9,9 +9,20 @@ import (
 
 // Handle incoming events from clients
 func handleEvent(conn *websocket.Conn, msg Message) {
+	// Before game start
 	switch msg.Action {
 	case "register":
 		register(conn, msg.Data) // msg.Data will contain the name of the user
+	}
+
+	//if !g.Started() {
+	//	return
+	//}
+
+	// During game
+	switch msg.Action {
+	case "throw_dice":
+		throwDice(conn)
 	}
 }
 
@@ -31,9 +42,16 @@ func sendRegisterRequest(conn *websocket.Conn) {
 func register(conn *websocket.Conn, name string) {
 	p := player.NewPlayer()
 	p.Name = name
+	p.Conn = conn
 
 	log.Printf("Registering new user: %s", name)
 	g.AddPlayer(p)
 
 	conn.WriteJSON(&Message{"register_ok", ""})
+}
+
+func throwDice(conn *websocket.Conn) {
+	p := g.GetPlayer(conn)
+	log.Printf("%s throws the dice\n", p.Name)
+	g.ThrowDice(p)
 }

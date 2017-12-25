@@ -1,17 +1,16 @@
 package dice
 
 import (
-	"testing"
 	"math/rand"
+	"testing"
 )
 
 var d *Dice
 
-func init(){
+func init() {
 	rand.Seed(1)
 	d = NewDice()
 }
-
 
 func TestNewDice(t *testing.T) {
 
@@ -39,4 +38,24 @@ func TestThrow(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestDice_Sum(t *testing.T) {
+	//
+	throws := make([][]int, 0)
+
+	for i := 1; i < 7; i++ {
+		for j := 1; j < 7; j++ {
+			throws = append(throws, []int{i, j})
+		}
+	}
+
+	for _, throw := range throws {
+		// Mock throw
+		d.Thrown = throw
+		if d.Sum() != throw[0]+throw[1] {
+			t.Fatalf("%d + %d should be %d, got: %d", throw[0], throw[1], throw[0]+throw[1], d.Sum())
+		}
+	}
+
 }
