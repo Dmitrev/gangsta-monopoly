@@ -64,12 +64,13 @@ func (g *Game) CheckStartGame() {
 		}
 	}
 
-	if allReady {
-		log.Printf("All players are ready")
-	} else {
+	if !allReady {
 		log.Printf("Not all players are ready")
+		return
 	}
 
+	// Game is ready to start!
+	g.StartGame()
 }
 
 func (g *Game) StartGame() (err error) {
@@ -78,6 +79,7 @@ func (g *Game) StartGame() (err error) {
 		return
 	}
 	g.started = true
+	g.updateAll("game_started", nil)
 	return
 }
 
@@ -176,4 +178,13 @@ func (g *Game) Disconnect(conn *websocket.Conn) {
 	// Update the players list
 	g.SendAllPlayersPositions()
 
+}
+
+func (g *Game) updateAll(action string, data interface{}) {
+	for _, p := range g.Players {
+		p.Conn.WriteJSON(&struct {
+			Action string      `json:"action"`
+			Data   interface{} `json:"data"`
+		}{action, data})
+	}
 }

@@ -23,6 +23,7 @@ new Vue({
                     case 'register': self.register(); break;
                     case 'register_ok': self.goToLobby(); break;
                     case 'position_update': self.updatePlayers(json.data); break;
+                    case 'game_started': self.startGame(); break;
                 }
             }
         },
@@ -51,6 +52,9 @@ new Vue({
           this.ws.send(JSON.stringify({
               action: "throw_dice"
           }));
+        },
+        startGame: function () {
+            this.screen = "game";
         },
         updatePlayers: function (players) {
             this.players = players
