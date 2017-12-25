@@ -47,6 +47,9 @@ func register(conn *websocket.Conn, name string) {
 	log.Printf("Registering new user: %s", name)
 	g.AddPlayer(p)
 
+	// Send player information to all clients
+	g.SendAllPlayersPositions()
+
 	conn.WriteJSON(&Message{"register_ok", ""})
 }
 

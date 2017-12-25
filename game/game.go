@@ -20,8 +20,8 @@ type Game struct {
 }
 
 type PositionUpdate struct {
-	Name     string
-	Position int
+	Name     string `json:"name"`
+	Position int    `json:"position"`
 }
 
 var ErrNotEnoughPlayers = errors.New("not enough players in game")
@@ -102,11 +102,11 @@ func (g *Game) ThrowDice(p *player.Player) {
 	nextPosition := g.NextPosition(p)
 	log.Printf("%s's next position is %d", p.Name, nextPosition)
 	p.Position = nextPosition
-	g.sendAllPlayersPositions()
+	g.SendAllPlayersPositions()
 
 }
 
-func (g *Game) sendAllPlayersPositions() {
+func (g *Game) SendAllPlayersPositions() {
 
 	var positions = make([]PositionUpdate, 0)
 
@@ -118,8 +118,8 @@ func (g *Game) sendAllPlayersPositions() {
 	// Send all the positions
 	for _, p := range g.Players {
 		p.Conn.WriteJSON(&struct {
-			Action string `json:"action"`
-			Data   []PositionUpdate
+			Action string           `json:"action"`
+			Data   []PositionUpdate `json:"data"`
 		}{"position_update", positions})
 	}
 }

@@ -5,7 +5,8 @@ new Vue({
 
     data: {
         ws: null, // websocket
-        screen: "start"
+        screen: "start",
+        players: []
     },
     
     methods:{
@@ -17,10 +18,11 @@ new Vue({
 
             this.ws.onmessage = function (event) {
                 var json = JSON.parse(event.data);
-
+                console.log(json);
                 switch(json.action) {
                     case 'register': self.register(); break;
                     case 'register_ok': self.goToLobby(); break;
+                    case 'position_update': self.updatePlayers(json.data); break;
                 }
             }
         },
@@ -44,6 +46,9 @@ new Vue({
           this.ws.send(JSON.stringify({
               action: "throw_dice"
           }));
+        },
+        updatePlayers: function (players) {
+            this.players = players
         }
     }
 });
