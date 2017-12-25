@@ -49,6 +49,12 @@ func (g *Game) AddPlayer(p *player.Player) {
 }
 
 func (g *Game) CheckStartGame() {
+
+	if len(g.Players) < 2 {
+		log.Printf("Not enough players to start")
+		return
+	}
+
 	// Check if all players are ready
 	allReady := true
 
