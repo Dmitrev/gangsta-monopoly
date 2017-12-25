@@ -59,6 +59,7 @@ func ready(conn *websocket.Conn) {
 	p, _ := g.GetPlayer(conn)
 	// Toggle ready state
 	p.Ready = !p.Ready
+	g.CheckStartGame()
 
 	// Send player information to all clients
 	g.SendAllPlayersPositions()

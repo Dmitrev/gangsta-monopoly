@@ -48,6 +48,24 @@ func (g *Game) AddPlayer(p *player.Player) {
 
 }
 
+func (g *Game) CheckStartGame() {
+	// Check if all players are ready
+	allReady := true
+
+	for _, p := range g.Players {
+		if !p.Ready {
+			allReady = false
+		}
+	}
+
+	if allReady {
+		log.Printf("All players are ready")
+	} else {
+		log.Printf("Not all players are ready")
+	}
+
+}
+
 func (g *Game) StartGame() (err error) {
 	if len(g.Players) < 2 {
 		err = ErrNotEnoughPlayers
@@ -69,7 +87,6 @@ func (g *Game) FirstTurn() (err error) {
 
 func (g *Game) GetPlayer(conn *websocket.Conn) (*player.Player, int) {
 	for index, p := range g.Players {
-		log.Printf("Socket connection: %#v\n\n\n", conn)
 		if conn == p.Conn {
 			return p, index
 		}
