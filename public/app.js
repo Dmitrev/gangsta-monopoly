@@ -6,7 +6,8 @@ new Vue({
     data: {
         ws: null, // websocket
         screen: "start",
-        players: []
+        players: [],
+        myTurn: false
     },
     
     methods:{
@@ -24,6 +25,7 @@ new Vue({
                     case 'register_ok': self.goToLobby(); break;
                     case 'position_update': self.updatePlayers(json.data); break;
                     case 'game_started': self.startGame(); break;
+                    case 'next_turn': self.startGame(); break;
                 }
             }
         },

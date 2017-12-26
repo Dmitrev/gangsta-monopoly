@@ -14,11 +14,12 @@ import (
 )
 
 type Game struct {
-	Board    board.Board
-	Dice     *dice.Dice
-	Players  []*player.Player
-	initDone bool
-	started  bool
+	Board       board.Board
+	Dice        *dice.Dice
+	Players     []*player.Player
+	initDone    bool
+	started     bool
+	currentTurn int
 }
 
 type PositionUpdate struct {
@@ -80,6 +81,7 @@ func (g *Game) StartGame() (err error) {
 	}
 	g.started = true
 	g.updateAll("game_started", nil)
+	g.FirstTurn()
 	return
 }
 
@@ -89,8 +91,28 @@ func (g *Game) FirstTurn() (err error) {
 		return
 	}
 
-	g.Players[0].IsTurn = true
+	g.currentTurn = -1
+	g.NextTurn()
 	return
+}
+
+func (g *Game) NextTurn() {
+
+	nextTurn := g.currentTurn + 1
+
+	// Out of bounds
+	if nextTurn > len(g.Players)-1 {
+		nextTurn = 0
+	}
+
+	g.currentTurn = nextTurn
+	nextPlayer := g.Players[nextTurn]
+
+	g.updateAll("next_turn", struct {
+		Name string `json:"name"`
+	}{nextPlayer.Name})
+
+	g.updatePlayer(nextPlayer, "your_turn", nil)
 }
 
 func (g *Game) GetPlayer(conn *websocket.Conn) (*player.Player, int) {
@@ -182,9 +204,15 @@ func (g *Game) Disconnect(conn *websocket.Conn) {
 
 func (g *Game) updateAll(action string, data interface{}) {
 	for _, p := range g.Players {
-		p.Conn.WriteJSON(&struct {
-			Action string      `json:"action"`
-			Data   interface{} `json:"data"`
-		}{action, data})
+		g.updatePlayer(p, action, data)
 	}
+}
+
+func (g *Game) updatePlayer(p *player.Player, action string, data interface{}) {
+
+	p.Conn.WriteJSON(&struct {
+		Action string      `json:"action"`
+		Data   interface{} `json:"data"`
+	}{action, data})
+
 }
