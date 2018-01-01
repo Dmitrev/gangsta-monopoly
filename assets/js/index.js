@@ -1,4 +1,5 @@
-'use strict';
+import Vue from 'vue'
+
 
 new Vue({
     el: '#app',
@@ -9,10 +10,9 @@ new Vue({
         players: [],
         myTurn: false
     },
-    
+
     methods:{
         // Linked to the
-
         start: function () {
             var self = this;
             this.ws = new WebSocket('ws://' + window.location.host + '/ws');

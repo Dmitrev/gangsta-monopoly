@@ -26,6 +26,7 @@ type PositionUpdate struct {
 	Name     string `json:"name"`
 	Position int    `json:"position"`
 	Ready    bool   `json:"ready"`
+	HasTurn  bool   `json:"has_turn"`
 }
 
 var ErrNotEnoughPlayers = errors.New("not enough players in game")
@@ -162,8 +163,9 @@ func (g *Game) SendAllPlayersPositions() {
 	var positions = make([]PositionUpdate, 0)
 
 	// Collect all the positions
-	for _, p := range g.Players {
-		positions = append(positions, PositionUpdate{p.Name, p.Position, p.Ready})
+	for index, p := range g.Players {
+		hasTurn := index == g.currentTurn
+		positions = append(positions, PositionUpdate{p.Name, p.Position, p.Ready, hasTurn})
 	}
 
 	// Send all the positions
