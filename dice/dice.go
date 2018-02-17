@@ -5,23 +5,18 @@ import (
 )
 
 type Dice struct {
-	count  int
+	Count  int
 	Thrown []int
-}
-
-func NewDice() *Dice {
-	d := Dice{2, []int{}}
-	return &d
 }
 
 // Throw will generate new numbers in the Thrown slice
 func (d *Dice) Throw() {
 	max := 6
 	min := 1
-	thrown := make([]int, d.count)
+	thrown := make([]int, d.Count)
 
 	// Generate new numbers from 1-6
-	for i := 0; i < d.count; i++ {
+	for i := 0; i < d.Count; i++ {
 		random := rand.Intn(max-min) + min
 		thrown[i] = random
 	}

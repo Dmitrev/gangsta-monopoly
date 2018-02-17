@@ -13,8 +13,15 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	GameCreating = iota
+	GamePlaying
+	GameFinished
+)
+
 type Game struct {
-	Board       board.Board
+	Status      int
+	Board       *board.Board
 	Dice        *dice.Dice
 	Players     []*player.Player
 	initDone    bool
@@ -33,13 +40,26 @@ var ErrNotEnoughPlayers = errors.New("not enough players in game")
 var ErrGameNotStarted = errors.New("game not started")
 
 func NewGame() *Game {
-	g := Game{}
-	g.Dice = dice.NewDice()
-	g.Board = board.NewBoard()
+	g := Game{
+		Status: 0,
+		Board: &board.Board{
+			Spaces: make([]*board.Space, 0),
+		},
+		Dice:        &dice.Dice{Count: 2, Thrown: []int{}},
+		Players:     nil,
+		initDone:    false,
+		started:     false,
+		currentTurn: 0,
+	}
 	// Unit testing to see if the value has been initialized
 	g.initDone = true
 	return &g
 }
+
+//join
+//leave
+//playTurn
+//start
 
 func (g *Game) Started() bool {
 	return g.started
