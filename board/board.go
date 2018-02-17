@@ -1,16 +1,43 @@
 package board
 
-type space struct {
-	Name string
+import "github.com/Dmitrev/gangsta-monopoly/player"
+
+const (
+	SpaceTypeStart    = iota
+	SpaceTypeProperty
+	SpaceTypeRailroad
+	SpaceTypeJail
+	SpaceTypeGotoJail
+	SpaceTypeTax
+	SpaceTypeChance
+	SpaceTypeChest
+	SpaceTypeFreeParking
+)
+
+type Space struct {
+	Info  *SpaceInfo
+	Owner *player.Player
+}
+
+type SpaceInfo struct {
+	Name  string
+	Price int
+	Type  int
+	Rent  int
 }
 
 type Board struct {
-	Spaces [40]space
+	Spaces []*Space
 }
 
-func NewBoard() Board {
-	var b Board
-	b.Spaces = [40]space{}
-
-	return b
+func NewSpace(name string, spaceType int, price int, rent int) *Space {
+	return &Space{
+		Info: &SpaceInfo{
+			Name:  name,
+			Price: price,
+			Type:  spaceType,
+			Rent:  rent,
+		},
+		Owner: nil,
+	}
 }
