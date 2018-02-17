@@ -1,5 +1,8 @@
-import Vue from 'vue'
+import Vue from 'vue';
+import Vuex from 'vuex';
+import Store from './store/store';
 
+Vue.use(Vuex)
 
 new Vue({
     el: '#app',
@@ -10,7 +13,7 @@ new Vue({
         players: [],
         myTurn: false
     },
-
+    store: Store,
     methods:{
         // Linked to the
         start: function () {
