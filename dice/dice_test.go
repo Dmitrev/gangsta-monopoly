@@ -14,8 +14,8 @@ func init() {
 
 func TestNewDice(t *testing.T) {
 
-	if d.count != 2 {
-		t.Fatalf("The count of dice should be 2\n")
+	if d.Count != 2 {
+		t.Fatalf("The Count of dice should be 2\n")
 	}
 
 	if len(d.Thrown) != 0 {
