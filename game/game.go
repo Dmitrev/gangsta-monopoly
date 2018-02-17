@@ -43,7 +43,7 @@ func NewGame() *Game {
 	g := Game{
 		Status: 0,
 		Board: &board.Board{
-			Spaces: make([]*board.Space, 0),
+			Spaces: make([]*board.Space, 40),
 		},
 		Dice:        &dice.Dice{Count: 2, Thrown: []int{}},
 		Players:     nil,
@@ -153,13 +153,14 @@ func (g *Game) NextPosition(p *player.Player) int {
 	log.Printf("[NextPosition] calculated new position: %d", newPosition)
 
 	// Check if the new position is withing range of the board
-	if newPosition <= len(g.Board.Spaces) {
+	if newPosition <= len(g.Board.Spaces)-1 {
 		return newPosition
 	}
 
 	// If not, calculate how much we are beyond the index
-	overflow := newPosition - len(g.Board.Spaces)
-	log.Printf("[NextPosition] overflow: %d", newPosition)
+	overflow := newPosition - (len(g.Board.Spaces) - 1)
+	log.Printf("[NextPosition] calculate overflow %d - %d - 1 = %d", newPosition, len(g.Board.Spaces), overflow)
+	log.Printf("[NextPosition] overflow: %d", overflow)
 
 	// Because indexes start at 0 we need to compensate for that
 	return overflow - 1
@@ -170,7 +171,7 @@ func (g *Game) ThrowDice(p *player.Player) {
 
 	log.Printf("[g.ThrowDice] %#v", g.Dice)
 	g.Dice.Throw()
-	log.Printf("%s threw %d", p.Name, g.Dice.Sum())
+	log.Printf("%s threw (%v) %d", p.Name, g.Dice.Thrown, g.Dice.Sum())
 	nextPosition := g.NextPosition(p)
 	log.Printf("%s's next position is %d", p.Name, nextPosition)
 	p.Position = nextPosition

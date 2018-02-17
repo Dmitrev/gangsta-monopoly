@@ -28,6 +28,6 @@ func DeserializeToMessage(jsonString []byte) (*Message, error) {
 	return m, err
 }
 
-func DeserializeMessageData(message *Message, dataStruct interface{}) (error) {
+func DeserializeMessageData(message *Message, dataStruct interface{}) error {
 	return json.Unmarshal(message.Data, dataStruct)
 }
