@@ -287,10 +287,11 @@ func (g *Game) playerUpdates() {
 	log.Printf("Started listening for playerUpdates")
 	for {
 		update := <-playerUpdate
-		update.Receiver.Conn.WriteJSON(&struct {
-			Action string      `json:"action"`
-			Data   interface{} `json:"data"`
-		}{update.Message.Type, update.Message.Data})
+		msg, err := update.Message.Serialize()
+		if err != nil {
+			log.Printf("ERROR: %s", err)
+		}
+		update.Receiver.Conn.WriteMessage(websocket.TextMessage, msg)
 	}
 
 }
