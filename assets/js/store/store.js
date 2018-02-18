@@ -7,13 +7,21 @@ const store = new Vuex.Store({
   state: {
     players: [],
     currentPlayer: null,
+    myTurn: false,
+    ws: null,
   },
   getters: {
     players(state){
-      return state.players;
+        return state.players;
     },
     currentPlayer(state){
-      return state.currentPlayer;
+        return state.currentPlayer;
+    },
+    myTurn(state){
+        return state.myTurn;
+    },
+    ws(state){
+        return state.ws;
     }
   },
   mutations: {
@@ -22,6 +30,12 @@ const store = new Vuex.Store({
     },
     setCurrentPlayer(state, player) {
       state.currentPlayer = player;
+    },
+    setMyTurn(state, myTurn){
+        state.myTurn = myTurn;
+    },
+    setWs(state, ws){
+        state.ws = ws;
     }
   }
 });

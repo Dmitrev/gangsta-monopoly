@@ -3,7 +3,9 @@ import Vuex from 'vuex';
 import Store from './store/store';
 
 // Vue components
-import TurnIndicator from '../vue/turnIndicator'
+import TurnIndicator from '../vue/turnIndicator';
+import ThrowDiceButton from '../vue/throwDiceButton';
+
 Vue.use(Vuex);
 
 new Vue({
@@ -16,7 +18,8 @@ new Vue({
         myTurn: false
     },
     components: {
-        TurnIndicator
+        TurnIndicator,
+        ThrowDiceButton
     },
     store: Store,
     methods:{
@@ -35,7 +38,9 @@ new Vue({
                     case 'game_started': self.startGame(); break;
                     case 'next_turn': self.updateCurrentPlayer(json.data); break;
                 }
-            }
+            };
+            this.$store.commit('setWs', this.ws);
+
         },
         goToLobby: function () {
             this.screen = "lobby";
@@ -57,11 +62,6 @@ new Vue({
             this.ws.send(JSON.stringify({
                 action: "ready"
             }));
-        },
-        throwDice: function(){
-          this.ws.send(JSON.stringify({
-              action: "throw_dice"
-          }));
         },
         startGame: function () {
             this.screen = "game";
