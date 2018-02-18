@@ -9,6 +9,7 @@ import (
 
 	"github.com/Dmitrev/gangsta-monopoly/board"
 	"github.com/Dmitrev/gangsta-monopoly/dice"
+	"github.com/Dmitrev/gangsta-monopoly/networking"
 	"github.com/Dmitrev/gangsta-monopoly/player"
 	"github.com/gorilla/websocket"
 )
@@ -36,8 +37,16 @@ type PositionUpdate struct {
 	HasTurn  bool   `json:"has_turn"`
 }
 
+type Update struct {
+	Receiver *player.Player
+	Message  *networking.Message
+}
+
 var ErrNotEnoughPlayers = errors.New("not enough players in game")
 var ErrGameNotStarted = errors.New("game not started")
+
+var playerUpdate chan Update
+var allPlayersUpdate chan Update
 
 func NewGame() *Game {
 	g := Game{
@@ -53,6 +62,11 @@ func NewGame() *Game {
 	}
 	// Unit testing to see if the value has been initialized
 	g.initDone = true
+	// Listen for updates to be sent to players
+
+	playerUpdate = make(chan Update, 0)
+	allPlayersUpdate = make(chan Update, 0)
+	g.listenForUpdates()
 	return &g
 }
 
@@ -118,6 +132,10 @@ func (g *Game) FirstTurn() (err error) {
 }
 
 func (g *Game) NextTurn() {
+	if g.currentTurn > -1 {
+		currentPlayer := g.Players[g.currentTurn]
+		currentPlayer.EndTurn()
+	}
 
 	nextTurn := g.currentTurn + 1
 
@@ -176,14 +194,19 @@ func (g *Game) NextPosition(p *player.Player) int {
 func (g *Game) ThrowDice(p *player.Player) {
 
 	log.Printf("[g.ThrowDice] %#v", g.Dice)
+	// Generate dice numbers
 	g.Dice.Throw()
+	// Indicate that the player has thrown
+	p.ThrownDice = true
+	g.sendPlayerUpdate(p, "dice_thrown", nil)
 	log.Printf("%s threw (%v) %d", p.Name, g.Dice.Thrown, g.Dice.Sum())
+	// Calculate next position
 	nextPosition := g.NextPosition(p)
 	log.Printf("%s's next position is %d", p.Name, nextPosition)
+	// Move player to next position
 	p.Position = nextPosition
+	// Notify all players about the position change
 	g.SendAllPlayersPositions()
-	g.NextTurn()
-
 }
 
 func (g *Game) SendAllPlayersPositions() {
@@ -244,5 +267,34 @@ func (g *Game) updatePlayer(p *player.Player, action string, data interface{}) {
 		Action string      `json:"action"`
 		Data   interface{} `json:"data"`
 	}{action, data})
+}
+
+func (g *Game) listenForUpdates() {
+	go g.playerUpdates()
+	go g.allPlayersUpdates()
+}
+
+func (g *Game) sendPlayerUpdate(p *player.Player, messageType string, data interface{}) {
+	msg, err := networking.NewMessage(messageType, data)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	playerUpdate <- Update{p, msg}
+}
+
+func (g *Game) playerUpdates() {
+	log.Printf("Started listening for playerUpdates")
+	for {
+		update := <-playerUpdate
+		update.Receiver.Conn.WriteJSON(&struct {
+			Action string      `json:"action"`
+			Data   interface{} `json:"data"`
+		}{update.Message.Type, update.Message.Data})
+	}
+
+}
+
+func (g *Game) allPlayersUpdates() {
 
 }
