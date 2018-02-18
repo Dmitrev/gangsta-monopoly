@@ -2,7 +2,9 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Store from './store/store';
 
-Vue.use(Vuex)
+// Vue components
+import TurnIndicator from '../vue/turnIndicator'
+Vue.use(Vuex);
 
 new Vue({
     el: '#app',
@@ -12,6 +14,9 @@ new Vue({
         screen: "start",
         players: [],
         myTurn: false
+    },
+    components: {
+        TurnIndicator
     },
     store: Store,
     methods:{
@@ -28,8 +33,7 @@ new Vue({
                     case 'register_ok': self.goToLobby(); break;
                     case 'position_update': self.updatePlayers(json.data); break;
                     case 'game_started': self.startGame(); break;
-                    case 'next_turn': self.startGame(); break;
-                    case 'next_turn': self.startGame(); break;
+                    case 'next_turn': self.updateCurrentPlayer(json.data); break;
                 }
             }
         },
@@ -64,6 +68,9 @@ new Vue({
         },
         updatePlayers: function (players) {
             this.players = players
+        },
+        updateCurrentPlayer(player){
+            this.$store.commit("setCurrentPlayer", player);
         }
     }
 });

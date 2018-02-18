@@ -182,6 +182,7 @@ func (g *Game) ThrowDice(p *player.Player) {
 	log.Printf("%s's next position is %d", p.Name, nextPosition)
 	p.Position = nextPosition
 	g.SendAllPlayersPositions()
+	g.NextTurn()
 
 }
 
