@@ -37,6 +37,7 @@ new Vue({
                     case 'position_update': self.updatePlayers(json.data); break;
                     case 'game_started': self.startGame(); break;
                     case 'next_turn': self.updateCurrentPlayer(json.data); break;
+                    case 'your_turn': self.updateMyTurn(); break;
                 }
             };
             this.$store.commit('setWs', this.ws);
@@ -70,7 +71,12 @@ new Vue({
             this.players = players
         },
         updateCurrentPlayer(player){
+            // Resets all players "myTurn" property
+            this.$store.commit("setMyTurn", false);
             this.$store.commit("setCurrentPlayer", player);
+        },
+        updateMyTurn(){
+            this.$store.commit("setMyTurn", true);
         }
     }
 });
