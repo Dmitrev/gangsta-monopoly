@@ -31,28 +31,25 @@ func handleEvent(conn *websocket.Conn, msg Message) {
 // Send register request to client
 // Asking to fill in name
 func sendRegisterRequest(conn *websocket.Conn) {
-	err := conn.WriteJSON(&struct {
-		Action string `json:"action"`
-	}{"register"})
-
-	if err != nil {
-		log.Printf("[register] failed to send register request (%s)\n", err)
-	}
+	p := player.NewPlayer()
+	p.Conn = conn
+	g.AddPlayer(p)
+	g.SendPlayerUpdate(p, "register", nil)
 }
 
 // Create a player and add it to the game
 func register(conn *websocket.Conn, name string) {
-	p := player.NewPlayer()
+	p, index := g.GetPlayer(conn)
+	if index == -1 {
+		log.Fatal("Trying to register undefined user")
+	}
 	p.Name = name
-	p.Conn = conn
 
 	log.Printf("Registering new user: %s", name)
-	g.AddPlayer(p)
 
 	// Send player information to all clients
 	g.SendAllPlayersPositions()
-
-	conn.WriteJSON(&Message{"register_ok", ""})
+	g.SendPlayerUpdate(p, "register_ok", nil)
 }
 
 func ready(conn *websocket.Conn) {
@@ -68,7 +65,7 @@ func ready(conn *websocket.Conn) {
 func throwDice(conn *websocket.Conn) {
 	p, _ := g.GetPlayer(conn)
 
-	if !p.IsTurn {
+	if !p.IsTurn || p.ThrownDice {
 		log.Printf("%s tried to throw before his turn!", p.Name)
 		return
 	}

@@ -3,8 +3,8 @@ package networking
 import "encoding/json"
 
 type Message struct {
-	Type string          `json:"Type"`
-	Data json.RawMessage `json:"Data,omitempty"`
+	Type string          `json:"action"`
+	Data json.RawMessage `json:"data,omitempty"`
 }
 
 func (m *Message) Serialize() ([]byte, error) {

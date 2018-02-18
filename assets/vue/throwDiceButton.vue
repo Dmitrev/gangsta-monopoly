@@ -1,23 +1,29 @@
 <template>
-    <button v-if="myTurn" type="button" @click="throwDice">Throw the Dice</button>
+    <button v-if="myTurn" type="button" :disabled="thrownDice" @click="throwDice">Throw the Dice</button>
 </template>
 <script>
-export default {
-    computed: {
-      myTurn(){
-          return this.$store.getters.myTurn;
-      }
-    },
-    methods: {
-        throwDice: function(){
-            let ws = this.$store.getters.ws;
-            if( ws === null){
-                return;
+    export default {
+        computed: {
+            myTurn() {
+                return this.$store.getters.myTurn;
+            },
+            thrownDice() {
+                return this.$store.getters.thrownDice;
             }
-            ws.send(JSON.stringify({
-                action: "throw_dice"
-            }));
+        },
+        methods: {
+            throwDice: function () {
+                if (this.thrownDice) {
+                    return false;
+                }
+                let ws = this.$store.getters.ws;
+                if (ws === null) {
+                    return;
+                }
+                ws.send(JSON.stringify({
+                    action: "throw_dice"
+                }));
+            }
         }
     }
-}
 </script>

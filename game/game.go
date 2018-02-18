@@ -46,7 +46,6 @@ var ErrNotEnoughPlayers = errors.New("not enough players in game")
 var ErrGameNotStarted = errors.New("game not started")
 
 var playerUpdate chan Update
-var allPlayersUpdate chan Update
 
 func NewGame() *Game {
 	g := Game{
@@ -65,7 +64,6 @@ func NewGame() *Game {
 	// Listen for updates to be sent to players
 
 	playerUpdate = make(chan Update, 0)
-	allPlayersUpdate = make(chan Update, 0)
 	g.listenForUpdates()
 	return &g
 }
@@ -115,7 +113,7 @@ func (g *Game) StartGame() (err error) {
 		return
 	}
 	g.started = true
-	g.updateAll("game_started", nil)
+	g.SendAllPlayersUpdate("game_started", nil)
 	g.FirstTurn()
 	return
 }
@@ -153,11 +151,11 @@ func (g *Game) NextTurn() {
 	nextPlayer := g.Players[nextTurn]
 	nextPlayer.IsTurn = true
 	log.Printf("%s is not on turn", nextPlayer.Name)
-	g.updateAll("next_turn", struct {
+	g.SendAllPlayersUpdate("next_turn", struct {
 		Name string `json:"name"`
 	}{nextPlayer.Name})
 
-	g.updatePlayer(nextPlayer, "your_turn", nil)
+	g.SendPlayerUpdate(nextPlayer, "your_turn", nil)
 }
 
 func (g *Game) GetPlayer(conn *websocket.Conn) (*player.Player, int) {
@@ -198,7 +196,7 @@ func (g *Game) ThrowDice(p *player.Player) {
 	g.Dice.Throw()
 	// Indicate that the player has thrown
 	p.ThrownDice = true
-	g.sendPlayerUpdate(p, "dice_thrown", nil)
+	g.SendPlayerUpdate(p, "thrown_dice", nil)
 	log.Printf("%s threw (%v) %d", p.Name, g.Dice.Thrown, g.Dice.Sum())
 	// Calculate next position
 	nextPosition := g.NextPosition(p)
@@ -218,26 +216,14 @@ func (g *Game) SendAllPlayersPositions() {
 		hasTurn := index == g.currentTurn
 		positions = append(positions, PositionUpdate{p.Name, p.Position, p.Ready, hasTurn})
 	}
-
 	// Send all the positions
-	for _, p := range g.Players {
-		p.Conn.WriteJSON(&struct {
-			Action string           `json:"action"`
-			Data   []PositionUpdate `json:"data"`
-		}{"position_update", positions})
-	}
+	g.SendAllPlayersUpdate("position_update", positions)
 }
 
 func (g *Game) BroadCastPlayerLeft(p *player.Player) {
 	// Send all the positions
 	message := fmt.Sprintf("%s left the game", p.Name)
-
-	for _, p := range g.Players {
-		p.Conn.WriteJSON(&struct {
-			Action string `json:"action"`
-			Data   string `json:"data"`
-		}{"player_left", message})
-	}
+	g.SendAllPlayersUpdate("player_left", message)
 }
 
 func (g *Game) RemovePlayerByIndex(index int) {
@@ -255,32 +241,29 @@ func (g *Game) Disconnect(conn *websocket.Conn) {
 
 }
 
-func (g *Game) updateAll(action string, data interface{}) {
-	for _, p := range g.Players {
-		g.updatePlayer(p, action, data)
-	}
-}
-
-func (g *Game) updatePlayer(p *player.Player, action string, data interface{}) {
-
-	p.Conn.WriteJSON(&struct {
-		Action string      `json:"action"`
-		Data   interface{} `json:"data"`
-	}{action, data})
-}
-
 func (g *Game) listenForUpdates() {
 	go g.playerUpdates()
-	go g.allPlayersUpdates()
 }
 
-func (g *Game) sendPlayerUpdate(p *player.Player, messageType string, data interface{}) {
+func (g *Game) SendPlayerUpdate(p *player.Player, messageType string, data interface{}) {
 	msg, err := networking.NewMessage(messageType, data)
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	playerUpdate <- Update{p, msg}
+}
+func (g *Game) SendAllPlayersUpdate(messageType string, data interface{}) {
+	msg, err := networking.NewMessage(messageType, data)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, p := range g.Players {
+		playerUpdate <- Update{p, msg}
+	}
 }
 
 func (g *Game) playerUpdates() {
@@ -293,9 +276,5 @@ func (g *Game) playerUpdates() {
 		}
 		update.Receiver.Conn.WriteMessage(websocket.TextMessage, msg)
 	}
-
-}
-
-func (g *Game) allPlayersUpdates() {
 
 }

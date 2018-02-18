@@ -4,40 +4,47 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
-  state: {
-    players: [],
-    currentPlayer: null,
-    myTurn: false,
-    ws: null,
-  },
-  getters: {
-    players(state){
-        return state.players;
+    state: {
+        players: [],
+        currentPlayer: null,
+        myTurn: false,
+        ws: null,
+        thrownDice: false
     },
-    currentPlayer(state){
-        return state.currentPlayer;
+    getters: {
+        players(state) {
+            return state.players;
+        },
+        currentPlayer(state) {
+            return state.currentPlayer;
+        },
+        myTurn(state) {
+            return state.myTurn;
+        },
+        ws(state) {
+            return state.ws;
+        },
+        thrownDice(state) {
+            return state.thrownDice;
+        }
     },
-    myTurn(state){
-        return state.myTurn;
-    },
-    ws(state){
-        return state.ws;
+    mutations: {
+        setPlayers(state, players) {
+            state.players = players;
+        },
+        setCurrentPlayer(state, player) {
+            state.currentPlayer = player;
+        },
+        setMyTurn(state, myTurn) {
+            state.myTurn = myTurn;
+        },
+        setWs(state, ws) {
+            state.ws = ws;
+        },
+        setThrownDice(state, thrown) {
+            state.thrownDice = thrown;
+        }
     }
-  },
-  mutations: {
-    setPlayers(state, players){
-      state.players = players;
-    },
-    setCurrentPlayer(state, player) {
-      state.currentPlayer = player;
-    },
-    setMyTurn(state, myTurn){
-        state.myTurn = myTurn;
-    },
-    setWs(state, ws){
-        state.ws = ws;
-    }
-  }
 });
 
 export default store;
