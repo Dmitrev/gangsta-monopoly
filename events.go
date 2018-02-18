@@ -67,6 +67,12 @@ func ready(conn *websocket.Conn) {
 
 func throwDice(conn *websocket.Conn) {
 	p, _ := g.GetPlayer(conn)
+
+	if !p.IsTurn {
+		log.Printf("%s tried to throw before his turn!", p.Name)
+		return
+	}
+
 	log.Printf("%s throws the dice\n", p.Name)
 	g.ThrowDice(p)
 }
