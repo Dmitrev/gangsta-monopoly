@@ -126,9 +126,15 @@ func (g *Game) NextTurn() {
 		nextTurn = 0
 	}
 
+	// Reset all player's turns
+	for _, p := range g.Players {
+		p.IsTurn = false
+	}
+
 	g.currentTurn = nextTurn
 	nextPlayer := g.Players[nextTurn]
-
+	nextPlayer.IsTurn = true
+	log.Printf("%s is not on turn", nextPlayer.Name)
 	g.updateAll("next_turn", struct {
 		Name string `json:"name"`
 	}{nextPlayer.Name})
