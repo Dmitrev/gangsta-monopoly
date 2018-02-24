@@ -1,68 +1,93 @@
+// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
-
-import (
-	"log"
-	"net/http"
-
-	"github.com/gorilla/websocket"
-)
-
-var upgrader = websocket.Upgrader{}
 
 type Message struct {
 	Action string `json:"action"`
 	Data   string `json:"data"`
 }
 
-var clients = make(map[*websocket.Conn]bool)
+type Server struct {
+	// Registered clients
+	clients map[*Client]bool
 
-func startServer() {
-	// Create simple file serverinfo info wa to serve static files
-	fs := http.FileServer(http.Dir("public"))
-	http.Handle("/", fs)
+	// Inbound messages from the clients.
+	broadcast chan []byte
 
-	// Setup handler for the websocket
-	http.HandleFunc("/ws", websocketHandler)
+	// Register requests from the clients.
+	register chan *Client
 
-	err := http.ListenAndServe(":8000", nil)
+	// Unregister requests from clients.
+	unregister chan *Client
+}
 
-	if err != nil {
-		log.Fatalf("ListenAndServe: %v", err)
+func newServer() *Server {
+	return &Server{
+		clients:    make(map[*Client]bool),
+		broadcast:  make(chan []byte),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
 	}
 }
 
-func websocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-
-	if err != nil {
-		log.Fatalf("[websocketHandler] Failed to upgrade connection (%s)\n", err)
-	}
-
-	defer conn.Close()
-
-	// Once the user gets here, that means we have a new connection
-	// Add client to the clients slice
-	clients[conn] = true
-	log.Printf("New user connected\n")
-	// Send register request to client
-	sendRegisterRequest(conn)
-
-	var msg Message
-	// Connection loop
+func (s *Server) run() {
 	for {
-		// Incoming JSON from the client
-		err := conn.ReadJSON(&msg)
+		select {
+		case client := <-s.register:
+			s.clients[client] = true
+		case client := <-s.unregister:
+			if _, ok := s.clients[client]; ok {
+				delete(s.clients, client)
+				close(client.send)
+			}
+		case message := <-s.broadcast:
+			for client := range s.clients {
+				select {
+				case client.send <- message:
+				default:
+					close(client.send)
+					delete(s.clients, client)
+				}
+			}
 
-		// If we cannot read the message anymore that means that the user is disconnected
-		if err != nil {
-			// Handle disconnect login in game
-			g.Disconnect(conn)
-			// Remove connection from clients
-			delete(clients, conn)
-			break
 		}
-
-		handleEvent(conn, msg)
 	}
-
 }
+
+//func websocketHandler(w http.ResponseWriter, r *http.Request) {
+//	conn, err := upgrader.Upgrade(w, r, nil)
+//
+//	if err != nil {
+//		log.Fatalf("[websocketHandler] Failed to upgrade connection (%s)\n", err)
+//	}
+//
+//	defer conn.Close()
+//
+//	// Once the user gets here, that means we have a new connection
+//	// Add client to the clients slice
+//	clients[conn] = true
+//	log.Printf("New user connected\n")
+//	// Send register request to client
+//	sendRegisterRequest(conn)
+//
+//	var msg Message
+//	// Connection loop
+//	for {
+//		// Incoming JSON from the client
+//		err := conn.ReadJSON(&msg)
+//
+//		// If we cannot read the message anymore that means that the user is disconnected
+//		if err != nil {
+//			// Handle disconnect login in game
+//			g.Disconnect(conn)
+//			// Remove connection from clients
+//			delete(clients, conn)
+//			break
+//		}
+//
+//		handleEvent(conn, msg)
+//	}
+//
+//}

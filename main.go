@@ -24,9 +24,17 @@ var g *game.Game
 
 func main() {
 	flag.Parse()
+
+	server := newServer()
+	go server.run()
 	// Create simple file server to serve static files from the public directory
 	fs := http.FileServer(http.Dir("public"))
 	http.Handle("/", fs)
+
+	// Handle the websocket connection
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(server, w, r)
+	})
 
 	err := http.ListenAndServe(*addr, nil)
 
