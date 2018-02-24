@@ -24,7 +24,6 @@ func startServer() {
 	// Setup handler for the websocket
 	http.HandleFunc("/ws", websocketHandler)
 
-	log.Printf("StartingServer server on port 8000\n")
 	err := http.ListenAndServe(":8000", nil)
 
 	if err != nil {
