@@ -16,6 +16,7 @@
 
 .idea/
 node_modules
+vendor
 
 # Dist files
 public/dist/*
