@@ -45,8 +45,6 @@ type Update struct {
 var ErrNotEnoughPlayers = errors.New("not enough players in game")
 var ErrGameNotStarted = errors.New("game not started")
 
-var playerUpdate chan Update
-
 func NewGame() *Game {
 	g := Game{
 		Status: 0,
@@ -252,7 +250,13 @@ func (g *Game) SendPlayerUpdate(p *player.Player, messageType string, data inter
 		log.Fatal(err)
 	}
 
-	playerUpdate <- Update{p, msg}
+	serialized, err := msg.Serialize()
+
+	if err != nil {
+		return
+	}
+
+	*p.Send <- serialized
 }
 func (g *Game) SendAllPlayersUpdate(messageType string, data interface{}) {
 	msg, err := networking.NewMessage(messageType, data)
@@ -261,20 +265,13 @@ func (g *Game) SendAllPlayersUpdate(messageType string, data interface{}) {
 		log.Fatal(err)
 	}
 
+	serialized, err := msg.Serialize()
+
+	if err != nil {
+		return
+	}
+
 	for _, p := range g.Players {
-		playerUpdate <- Update{p, msg}
+		*p.Send <- serialized
 	}
-}
-
-func (g *Game) playerUpdates() {
-	log.Printf("Started listening for playerUpdates")
-	for {
-		update := <-playerUpdate
-		msg, err := update.Message.Serialize()
-		if err != nil {
-			log.Printf("ERROR: %s", err)
-		}
-		update.Receiver.Conn.WriteMessage(websocket.TextMessage, msg)
-	}
-
 }

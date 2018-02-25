@@ -11,6 +11,7 @@ type Player struct {
 	Position   int
 	Ready      bool
 	Money      int
+	Send *chan []byte
 }
 
 func NewPlayer() *Player {

@@ -49,6 +49,8 @@ func sendRegisterRequest(c *Client) {
 	// Add connection to player to have a reference to client
 	p.Conn = c.conn
 
+	p.Send = &c.send
+
 	// Add player to client
 	c.player = p
 	// Add player to game
