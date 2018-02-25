@@ -4,13 +4,6 @@
 
 package main
 
-import "log"
-
-type Message struct {
-	Action string `json:"action"`
-	Data   string `json:"data"`
-}
-
 type Server struct {
 	// Registered clients
 	clients map[*Client]bool
@@ -38,24 +31,18 @@ func (s *Server) run() {
 	for {
 		select {
 		case client := <-s.register:
-			log.Println("[server.run()] s.register")
 			s.clients[client] = true
 			sendRegisterRequest(client)
 		case client := <-s.unregister:
-			log.Println("[server.run()] s.unregister")
 			if _, ok := s.clients[client]; ok {
-				log.Println("[server.run()] s.unregister - deleting client")
 				delete(s.clients, client)
 				close(client.send)
 			}
 		case message := <-s.broadcast:
-			log.Println("[server.run()] s.broadcast")
 			for client := range s.clients {
 				select {
 				case client.send <- message:
-					log.Println("[server.run()] s.register > message")
 				default:
-					log.Println("[server.run()] s.register > [default]")
 					close(client.send)
 					delete(s.clients, client)
 				}
