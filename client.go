@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 	"log"
-	"bytes"
 
 	"github.com/gorilla/websocket"
+	"github.com/Dmitrev/gangsta-monopoly/player"
 )
 
 const (
@@ -27,10 +27,7 @@ const (
 	maxMessageSize = 512
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
+var newline = []byte{'\n'}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -40,6 +37,7 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	server *Server
 
+	player *player.Player
 	// Websocket connection
 	conn *websocket.Conn
 
@@ -64,22 +62,26 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.server.broadcast <- message
+
+		// Send all incoming messages to the eventHandler
+		handleEvent(c, message)
 	}
 }
 func (c *Client) writePump() {
+	log.Printf("client.writePump()")
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
+		log.Printf("[client.writePump()] - defer()")
 		ticker.Stop()
 		c.conn.Close()
 	}()
 	for {
 		select {
 		case message, ok := <-c.send:
+			log.Printf("[client.writePump()] - c.send")
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				log.Fatalln("Server closed the send channel")
+				log.Printf("[client.writePump()] - c.send")
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
@@ -111,15 +113,17 @@ func (c *Client) writePump() {
 }
 
 func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
+	log.Printf("serverWs()")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	log.Printf("[serveWS] connection upgraded")
 
 	client := &Client{server: server, conn: conn, send: make(chan []byte, 256)}
 	client.server.register <- client
-	log.Printf("NEW CONNECTION")
+
 	go client.writePump()
 	go client.readPump()
 }

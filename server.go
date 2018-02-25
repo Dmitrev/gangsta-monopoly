@@ -38,18 +38,24 @@ func (s *Server) run() {
 	for {
 		select {
 		case client := <-s.register:
+			log.Println("[server.run()] s.register")
 			s.clients[client] = true
+			sendRegisterRequest(client)
 		case client := <-s.unregister:
+			log.Println("[server.run()] s.unregister")
 			if _, ok := s.clients[client]; ok {
+				log.Println("[server.run()] s.unregister - deleting client")
 				delete(s.clients, client)
 				close(client.send)
 			}
 		case message := <-s.broadcast:
+			log.Println("[server.run()] s.broadcast")
 			for client := range s.clients {
 				select {
 				case client.send <- message:
+					log.Println("[server.run()] s.register > message")
 				default:
-					log.Println("Lost connection with client")
+					log.Println("[server.run()] s.register > [default]")
 					close(client.send)
 					delete(s.clients, client)
 				}

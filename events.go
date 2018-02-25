@@ -5,47 +5,86 @@ import (
 
 	"github.com/Dmitrev/gangsta-monopoly/player"
 	"github.com/gorilla/websocket"
+	"github.com/Dmitrev/gangsta-monopoly/networking"
 )
 
+type Register struct{
+	Name string `json:"name"`
+}
+
 // Handle incoming events from clients
-func handleEvent(conn *websocket.Conn, msg Message) {
-	// Before game start
-	switch msg.Action {
-	case "register":
-		register(conn, msg.Data) // msg.Data will contain the name of the user
-	case "ready":
-		ready(conn)
+func handleEvent(client *Client, stream []byte) {
+	msg, err := networking.DeserializeToMessage(stream)
+
+	if err != nil {
+		log.Printf("Problem deserializing incoming message %#v", stream)
 	}
+
+	// Before game start
+	switch msg.Type {
+	case "register":
+
+		register(client, msg) // msg.Data will contain the name of the user
+	}
+	//case "ready":
+	//	ready(conn)
+	//}
 
 	//if !g.Started() {
 	//	return
 	//}
 
 	// During game
-	switch msg.Action {
-	case "throw_dice":
-		throwDice(conn)
-	}
+	//switch msg.Action {
+	//case "throw_dice":
+	//	throwDice(conn)
+	//}
 }
 
 // Send register request to client
 // Asking to fill in name
-func sendRegisterRequest(conn *websocket.Conn) {
+func sendRegisterRequest(c *Client) {
+	// Create new player
 	p := player.NewPlayer()
-	p.Conn = conn
+	// Add connection to player to have a reference to client
+	p.Conn = c.conn
+
+	// Add player to client
+	c.player = p
+	// Add player to game
 	g.AddPlayer(p)
-	g.SendPlayerUpdate(p, "register", nil)
+
+	// Send request to register
+	// Create new message
+	msg, err := networking.NewMessage("register",nil)
+	if err != nil {
+		return
+	}
+
+	// Serialize and send
+	serialized, err := msg.Serialize()
+	if err != nil {
+		return
+	}
+	c.send <- serialized
 }
 
 // Create a player and add it to the game
-func register(conn *websocket.Conn, name string) {
-	p, index := g.GetPlayer(conn)
-	if index == -1 {
-		log.Fatal("Trying to register undefined user")
-	}
-	p.Name = name
+func register(client *Client, msg *networking.Message) {
 
-	log.Printf("Registering new user: %s", name)
+	var r Register
+	log.Printf("%s", msg.Data)
+
+	err := networking.DeserializeMessageData(msg, &r)
+
+	if err != nil {
+		log.Printf("Error deserializing message data %s", err)
+	}
+
+	p := client.player
+	p.Name = r.Name
+
+	log.Printf("Registering new user: %s", p.Name)
 
 	// Send player information to all clients
 	g.SendAllPlayersPositions()

@@ -21,7 +21,7 @@
                     return;
                 }
                 ws.send(JSON.stringify({
-                    action: "throw_dice"
+                    type: "throw_dice"
                 }));
             }
         }

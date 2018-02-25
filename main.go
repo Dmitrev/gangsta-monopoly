@@ -24,7 +24,7 @@ var g *game.Game
 
 func main() {
 	flag.Parse()
-
+	g = game.NewGame()
 	server := newServer()
 	go server.run()
 	// Create simple file server to serve static files from the public directory

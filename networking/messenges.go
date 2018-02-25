@@ -3,7 +3,7 @@ package networking
 import "encoding/json"
 
 type Message struct {
-	Type string          `json:"action"`
+	Type string          `json:"type"`
 	Data json.RawMessage `json:"data,omitempty"`
 }
 

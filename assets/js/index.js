@@ -32,12 +32,12 @@ new Vue({
             let self = this;
             this.ws = new WebSocket('ws://' + window.location.host + '/ws');
             this.ws.addEventListener('close', function (event) {
-                alert("LOST CONNECTION TO THE SERVER")
+                // alert("LOST CONNECTION TO THE SERVER")
             });
             this.ws.addEventListener('message', function (event) {
                 let json = JSON.parse(event.data);
                 console.log(json);
-                switch(json.action) {
+                switch(json.type) {
                     case 'register': self.register(); break;
                     case 'register_ok': self.goToLobby(); break;
                     case 'position_update': self.updatePlayers(json.data); break;
@@ -58,8 +58,10 @@ new Vue({
 
             if (name.length !== 0) {
                 this.ws.send(JSON.stringify({
-                    action: "register",
-                    data: name
+                    type: "register",
+                    data: {
+                        name
+                    }
                 }));
             }
             else{
@@ -68,7 +70,7 @@ new Vue({
         },
         ready: function () {
             this.ws.send(JSON.stringify({
-                action: "ready"
+                type: "ready"
             }));
         },
         startGame: function () {
