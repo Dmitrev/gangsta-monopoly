@@ -7,9 +7,7 @@ package main
 import (
 	"net/http"
 	"time"
-
 	"log"
-
 	"bytes"
 
 	"github.com/gorilla/websocket"
@@ -81,6 +79,7 @@ func (c *Client) writePump() {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
+				log.Fatalln("Server closed the send channel")
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
@@ -120,6 +119,7 @@ func serveWs(server *Server, w http.ResponseWriter, r *http.Request) {
 
 	client := &Client{server: server, conn: conn, send: make(chan []byte, 256)}
 	client.server.register <- client
+	log.Printf("NEW CONNECTION")
 	go client.writePump()
 	go client.readPump()
 }

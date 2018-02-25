@@ -4,6 +4,8 @@
 
 package main
 
+import "log"
+
 type Message struct {
 	Action string `json:"action"`
 	Data   string `json:"data"`
@@ -47,6 +49,7 @@ func (s *Server) run() {
 				select {
 				case client.send <- message:
 				default:
+					log.Println("Lost connection with client")
 					close(client.send)
 					delete(s.clients, client)
 				}
