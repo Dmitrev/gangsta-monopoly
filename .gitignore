@@ -22,3 +22,4 @@ vendor
 public/dist/*
 # Executable file
 gangsta-monopoly
+mix-manifest.json
