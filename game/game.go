@@ -59,10 +59,7 @@ func NewGame() *Game {
 	}
 	// Unit testing to see if the value has been initialized
 	g.initDone = true
-	// Listen for updates to be sent to players
 
-	playerUpdate = make(chan Update, 0)
-	g.listenForUpdates()
 	return &g
 }
 
@@ -237,10 +234,6 @@ func (g *Game) Disconnect(conn *websocket.Conn) {
 	// Update the players list
 	g.SendAllPlayersPositions()
 
-}
-
-func (g *Game) listenForUpdates() {
-	go g.playerUpdates()
 }
 
 func (g *Game) SendPlayerUpdate(p *player.Player, messageType string, data interface{}) {
