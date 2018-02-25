@@ -8,6 +8,7 @@ import ThrowDiceButton from '../vue/throwDiceButton';
 
 Vue.use(Vuex);
 
+
 new Vue({
     el: '#app',
 
@@ -22,14 +23,19 @@ new Vue({
         ThrowDiceButton
     },
     store: Store,
+    mounted(){
+      this.start();
+    },
     methods:{
         // Linked to the
         start: function () {
-            var self = this;
+            let self = this;
             this.ws = new WebSocket('ws://' + window.location.host + '/ws');
-
-            this.ws.onmessage = function (event) {
-                var json = JSON.parse(event.data);
+            this.ws.addEventListener('close', function (event) {
+                alert("LOST CONNECTION TO THE SERVER")
+            });
+            this.ws.addEventListener('message', function (event) {
+                let json = JSON.parse(event.data);
                 console.log(json);
                 switch(json.action) {
                     case 'register': self.register(); break;
@@ -40,7 +46,7 @@ new Vue({
                     case 'your_turn': self.updateMyTurn(); break;
                     case 'thrown_dice': self.updateThrownDice(); break;
                 }
-            };
+            });
             this.$store.commit('setWs', this.ws);
 
         },
@@ -48,7 +54,7 @@ new Vue({
             this.screen = "lobby";
         },
         register: function () {
-            var name = prompt("What's your name?", "Player");
+            let name = prompt("What's your name?", "Player");
 
             if (name.length !== 0) {
                 this.ws.send(JSON.stringify({
