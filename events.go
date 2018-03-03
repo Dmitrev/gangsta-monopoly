@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/Dmitrev/gangsta-monopoly/player"
-	"github.com/gorilla/websocket"
 	"github.com/Dmitrev/gangsta-monopoly/networking"
 )
 
@@ -33,10 +32,10 @@ func handleEvent(client *Client, stream []byte) {
 	//}
 
 	// During game
-	//switch msg.Action {
-	//case "throw_dice":
-	//	throwDice(conn)
-	//}
+	switch msg.Type {
+	case "throw_dice":
+		throwDice(client)
+	}
 }
 
 // Send register request to client
@@ -101,8 +100,8 @@ func ready(client *Client, msg *networking.Message) {
 	g.SendAllPlayersPositions()
 }
 
-func throwDice(conn *websocket.Conn) {
-	p, _ := g.GetPlayer(conn)
+func throwDice(client *Client) {
+	p := client.player
 
 	if !p.IsTurn || p.ThrownDice {
 		log.Printf("%s tried to throw before his turn!", p.Name)
