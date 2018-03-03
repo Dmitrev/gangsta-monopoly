@@ -7,7 +7,7 @@ import (
 	"github.com/Dmitrev/gangsta-monopoly/networking"
 )
 
-type Register struct{
+type Register struct {
 	Name string `json:"name"`
 }
 
@@ -35,6 +35,8 @@ func handleEvent(client *Client, stream []byte) {
 	switch msg.Type {
 	case "throw_dice":
 		throwDice(client)
+	case "end_turn":
+		g.NextTurn()
 	}
 }
 
@@ -55,7 +57,7 @@ func sendRegisterRequest(c *Client) {
 
 	// Send request to register
 	// Create new message
-	msg, err := networking.NewMessage("register",nil)
+	msg, err := networking.NewMessage("register", nil)
 	if err != nil {
 		return
 	}

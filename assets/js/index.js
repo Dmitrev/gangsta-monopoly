@@ -5,6 +5,7 @@ import Store from './store/store';
 // Vue components
 import TurnIndicator from '../vue/turnIndicator';
 import ThrowDiceButton from '../vue/throwDiceButton';
+import EndTurnButton from '../vue/endTurnButton';
 
 Vue.use(Vuex);
 
@@ -20,7 +21,8 @@ new Vue({
     },
     components: {
         TurnIndicator,
-        ThrowDiceButton
+        ThrowDiceButton,
+        EndTurnButton
     },
     store: Store,
     mounted(){
