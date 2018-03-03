@@ -36,8 +36,15 @@ func handleEvent(client *Client, stream []byte) {
 	case "throw_dice":
 		throwDice(client)
 	case "end_turn":
-		g.NextTurn()
+		endTurn(client)
 	}
+}
+func endTurn(client *Client) {
+	// Player cannot end turn before throwing the dice
+	if !client.player.ThrownDice {
+		return
+	}
+	g.NextTurn()
 }
 
 // Send register request to client
