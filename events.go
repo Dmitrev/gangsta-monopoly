@@ -23,12 +23,10 @@ func handleEvent(client *Client, stream []byte) {
 	// Before game start
 	switch msg.Type {
 	case "register":
-
 		register(client, msg) // msg.Data will contain the name of the user
+	case "ready":
+		ready(client, msg)
 	}
-	//case "ready":
-	//	ready(conn)
-	//}
 
 	//if !g.Started() {
 	//	return
@@ -93,8 +91,8 @@ func register(client *Client, msg *networking.Message) {
 	g.SendPlayerUpdate(p, "register_ok", nil)
 }
 
-func ready(conn *websocket.Conn) {
-	p, _ := g.GetPlayer(conn)
+func ready(client *Client, msg *networking.Message) {
+	p := client.player
 	// Toggle ready state
 	p.Ready = !p.Ready
 	g.CheckStartGame()

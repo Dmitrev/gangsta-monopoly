@@ -47,6 +47,7 @@ type Client struct {
 
 func (c *Client) readPump() {
 	defer func() {
+		g.Disconnect(c.conn)
 		c.server.unregister <- c
 		c.conn.Close()
 	}()

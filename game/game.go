@@ -265,6 +265,7 @@ func (g *Game) SendAllPlayersUpdate(messageType string, data interface{}) {
 	}
 
 	for _, p := range g.Players {
+		log.Printf("Send update to player %s", p.Name)
 		*p.Send <- serialized
 	}
 }
