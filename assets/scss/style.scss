@@ -3,7 +3,18 @@
     The attribute is automatically removed from the element by VueJS ones it's loaded
  */
 [v-cloak]{display:none}
+html, body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height: 100%;
+}
 
+#app{
+  width: 100%;
+  height: 100%;
+  background:yellow;
+}
 #lobby-players {
   color:red;
 

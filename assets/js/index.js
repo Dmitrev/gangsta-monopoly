@@ -6,7 +6,7 @@ import Store from './store/store';
 import TurnIndicator from '../vue/turnIndicator';
 import ThrowDiceButton from '../vue/throwDiceButton';
 import EndTurnButton from '../vue/endTurnButton';
-
+import Game from '../vue/game'
 Vue.use(Vuex);
 
 
@@ -22,7 +22,8 @@ new Vue({
     components: {
         TurnIndicator,
         ThrowDiceButton,
-        EndTurnButton
+        EndTurnButton,
+        Game
     },
     store: Store,
     mounted(){
@@ -56,6 +57,7 @@ new Vue({
             this.screen = "lobby";
         },
         register: function () {
+            return;
             let name = prompt("What's your name?", "Player");
 
             if (name.length !== 0) {

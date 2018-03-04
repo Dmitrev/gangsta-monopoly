@@ -227,6 +227,9 @@ func (g *Game) RemovePlayerByIndex(index int) {
 
 func (g *Game) Disconnect(conn *websocket.Conn) {
 	p, index := g.GetPlayer(conn)
+	if p == nil{
+		return
+	}
 	// Remvoe player from the players slice
 	g.RemovePlayerByIndex(index)
 	// Let other players know who left

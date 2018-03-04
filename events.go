@@ -27,9 +27,9 @@ func handleEvent(client *Client, stream []byte) {
 		ready(client, msg)
 	}
 
-	//if !g.Started() {
-	//	return
-	//}
+	if !g.Started() {
+		return
+	}
 
 	// During game
 	switch msg.Type {
@@ -50,18 +50,6 @@ func endTurn(client *Client) {
 // Send register request to client
 // Asking to fill in name
 func sendRegisterRequest(c *Client) {
-	// Create new player
-	p := player.NewPlayer()
-	// Add connection to player to have a reference to client
-	p.Conn = c.conn
-
-	p.Send = &c.send
-
-	// Add player to client
-	c.player = p
-	// Add player to game
-	g.AddPlayer(p)
-
 	// Send request to register
 	// Create new message
 	msg, err := networking.NewMessage("register", nil)
@@ -79,6 +67,17 @@ func sendRegisterRequest(c *Client) {
 
 // Create a player and add it to the game
 func register(client *Client, msg *networking.Message) {
+	// Create new player
+	p := player.NewPlayer()
+	// Add connection to player to have a reference to client
+	p.Conn = client.conn
+
+	p.Send = &client.send
+
+	// Add player to client
+	client.player = p
+	// Add player to game
+	g.AddPlayer(p)
 
 	var r Register
 	log.Printf("%s", msg.Data)
@@ -89,7 +88,6 @@ func register(client *Client, msg *networking.Message) {
 		log.Printf("Error deserializing message data %s", err)
 	}
 
-	p := client.player
 	p.Name = r.Name
 
 	log.Printf("Registering new user: %s", p.Name)
